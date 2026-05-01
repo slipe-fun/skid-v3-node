@@ -17,14 +17,19 @@ const chats = [
     },
 ]
 
+// generate user keys
+
+const user_keys_A = skid.keys.e2ee.generate()
+const user_keys_B = skid.keys.e2ee.generate()
+
 // generate master key
 
 const master_key = skid.keys.master_key.generate();
 
 // encrypt and decrypt bundle by master_key
 
-const encryptedBundle = skid.bundle.encrypt(master_key, chats)
-const decryptedBundle = skid.bundle.decrypt(master_key, encryptedBundle)
+const encryptedBundle = skid.bundle.encrypt(master_key, user_keys_A.ed.secret_key, chats)
+const decryptedBundle = skid.bundle.decrypt(master_key, user_keys_A.ed.public_key, encryptedBundle)
 
 // generate recovery key
 
@@ -37,15 +42,15 @@ const entropy = skid.keys.recovery_key.entropy.get(mnemonic);
 
 // encrypt and decrypt master_key
 
-const encryptedMasterKey = skid.keys.master_key.encrypt(master_key, recovery_key);
-const decryptedMasterKey = skid.keys.master_key.decrypt(encryptedMasterKey, recovery_key);
+const encryptedMasterKey = skid.keys.master_key.encrypt(master_key, recovery_key, user_keys_A.ed.secret_key);
+const decryptedMasterKey = skid.keys.master_key.decrypt(encryptedMasterKey, recovery_key, user_keys_A.ed.public_key);
 
 // generate e2ee keys
 
-const user_A = { id: 1, ...skid.keys.e2ee.generate() };
-const user_B = { id: 2, ...skid.keys.e2ee.generate() };
+const chat_user_A = { id: 1, chat_id: 5, ...skid.keys.e2ee.generate() };
+const chat_user_B = { id: 2, chat_id: 5, ...skid.keys.e2ee.generate() };
 
 // encrypt and decrypt message by e2ee keys
 
-const encryptedMessage = skid.message.encrypt(user_B, user_A, new TextEncoder().encode("the first skid v3 message"))
-const decryptedMessage = skid.message.decrypt(user_B, user_A, encryptedMessage)
+const encryptedMessage = skid.message.encrypt(chat_user_B, chat_user_A, user_keys_A.ed.secret_key, new TextEncoder().encode("the first skid v3 message"))
+const decryptedMessage = skid.message.decrypt(chat_user_B, chat_user_A, user_keys_A.ed.public_key, encryptedMessage)

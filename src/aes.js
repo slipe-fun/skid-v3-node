@@ -1,15 +1,15 @@
 import { gcmsiv } from '@noble/ciphers/aes.js'
 import { generateSalt } from './keys.js'
 
-export function encrypt(key, content, iv, aad) {
-  const cipher = gcmsiv(key, iv, aad)
+export function encrypt(key, content, nonce, aad) {
+  const cipher = gcmsiv(key, nonce, aad)
   return {
     ciphertext: cipher.encrypt(content),
-    iv
+    nonce
   }
 }
 
-export function decrypt(key, ciphertext, iv, aad) {
-  const cipher = gcmsiv(key, iv, aad)
+export function decrypt(key, ciphertext, nonce, aad) {
+  const cipher = gcmsiv(key, nonce, aad)
   return cipher.decrypt(ciphertext)
 }
