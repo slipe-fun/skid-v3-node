@@ -12,8 +12,16 @@ export function encryptMessage(receiver, sender, content) {
     const derivedKey = hkdfExpand(sessionKey, salt, new TextEncoder().encode("skid:v3:message"), 32);
 
     const aad = buildAAD('message', {
-        sender: sender?.id,
-        receiver: receiver?.id
+        sender_id: sender?.id,
+        receiver_id: receiver?.id,
+        sender_keys: {
+            public_key: sender?.ecdh?.public_key,
+            secret_key: sender?.ecdh?.secret_key
+        },
+        receiver_keys: {
+            public_key: receiver?.ecdh?.public_key,
+            secret_key: receiver?.ecdh?.secret_key
+        }
     })
 
     return {
@@ -29,8 +37,16 @@ export function decryptMessage(receiver, sender, message) {
     const derivedKey = hkdfExpand(sessionKey, message?.salt, new TextEncoder().encode("skid:v3:message"), 32);
 
     const aad = buildAAD('message', {
-        sender: sender?.id,
-        receiver: receiver?.id
+        sender_id: sender?.id,
+        receiver_id: receiver?.id,
+        sender_keys: {
+            public_key: sender?.ecdh?.public_key,
+            secret_key: sender?.ecdh?.secret_key
+        },
+        receiver_keys: {
+            public_key: receiver?.ecdh?.public_key,
+            secret_key: receiver?.ecdh?.secret_key
+        }
     })
 
     return decrypt(derivedKey, message?.ciphertext, message?.iv, aad);
