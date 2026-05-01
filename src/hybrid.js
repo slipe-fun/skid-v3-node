@@ -1,6 +1,7 @@
 import { x448 } from '@noble/curves/ed448.js'
 import { sha256 } from '@noble/hashes/sha2.js'
 import { ml_kem512 } from '@noble/post-quantum/ml-kem.js'
+import { encrypt } from './aes.js';
 
 export function hybridEncapsulate(receiverECDHPub, receiverKyberPub, senderECDHPriv) {
   const { publicKey: ephemeralECDHPublicKey, secretKey: ephemeralECDHSecretKey } = x448.keygen();

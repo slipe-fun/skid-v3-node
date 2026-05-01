@@ -54,3 +54,4 @@ const chat_user_B = { id: 2, chat_id: 5, ...skid.keys.e2ee.generate() };
 
 const encryptedMessage = skid.message.encrypt(chat_user_B, chat_user_A, user_keys_A.ed.secret_key, new TextEncoder().encode("the first skid v3 message"))
 const decryptedMessage = skid.message.decrypt(chat_user_B, chat_user_A, user_keys_A.ed.public_key, encryptedMessage)
+const decryptedOwnMessage = skid.message.decrypt(chat_user_B, chat_user_A, user_keys_A.ed.public_key, encryptedMessage, true)
