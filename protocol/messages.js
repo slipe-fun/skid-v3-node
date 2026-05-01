@@ -8,8 +8,9 @@ export function encryptMessage(receiver, sender, content) {
     const { sessionKey, cipherText: encapsulated_key } = hybridEncapsulate(receiver?.ecdh?.public_key, receiver?.ml_kem?.public_key, sender?.ecdh?.secret_key);
 
     const salt = generateSalt();
+    const nonce = generateSalt();
 
-    const derivedKey = hkdfExpand(sessionKey, salt, new TextEncoder().encode("skid:v3:message"), 32);
+    const derivedKey = hkdfExpand(sessionKey, salt, new TextEncoder().encode(`skid:v3:message:${sender?.id}:${receiver?.id}`), 32);
 
     const aad = buildAAD('message', {
         sender_id: sender?.id,
@@ -21,11 +22,12 @@ export function encryptMessage(receiver, sender, content) {
         receiver_keys: {
             public_key: receiver?.ecdh?.public_key,
             secret_key: receiver?.ecdh?.secret_key
-        }
+        },
+        nonce
     })
 
     return {
-        ...encrypt(derivedKey, content, aad),
+        ...encrypt(derivedKey, content, nonce, aad),
         encapsulated_key,
         salt
     }
@@ -34,7 +36,7 @@ export function encryptMessage(receiver, sender, content) {
 export function decryptMessage(receiver, sender, message) {
     const { sessionKey } = hybridDecapsulate(sender?.ecdh?.public_key, receiver?.ecdh?.secret_key, receiver?.ml_kem?.secret_key, message?.encapsulated_key);
 
-    const derivedKey = hkdfExpand(sessionKey, message?.salt, new TextEncoder().encode("skid:v3:message"), 32);
+    const derivedKey = hkdfExpand(sessionKey, message?.salt, new TextEncoder().encode(`skid:v3:message:${sender?.id}:${receiver?.id}`), 32);
 
     const aad = buildAAD('message', {
         sender_id: sender?.id,
@@ -46,7 +48,8 @@ export function decryptMessage(receiver, sender, message) {
         receiver_keys: {
             public_key: receiver?.ecdh?.public_key,
             secret_key: receiver?.ecdh?.secret_key
-        }
+        },
+        nonce: message?.iv
     })
 
     return decrypt(derivedKey, message?.ciphertext, message?.iv, aad);

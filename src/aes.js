@@ -1,8 +1,7 @@
 import { gcmsiv } from '@noble/ciphers/aes.js'
 import { generateSalt } from './keys.js'
 
-export function encrypt(key, content, aad) {
-  const iv = generateSalt()
+export function encrypt(key, content, iv, aad) {
   const cipher = gcmsiv(key, iv, aad)
   return {
     ciphertext: cipher.encrypt(content),
