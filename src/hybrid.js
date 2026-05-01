@@ -4,7 +4,7 @@ import { ml_kem512 } from '@noble/post-quantum/ml-kem.js'
 
 export function hybridEncapsulate(receiverECDHPub, receiverKyberPub, senderECDHPriv) {
   const { publicKey: ephemeralECDHPublicKey, secretKey: ephemeralECDHSecretKey } = x448.keygen();
-  const ephemeralECDHSharedSecret = x448.getSharedSecret(ephemeralECDHSecretKey, receiverECDHPub).slice(1)
+  const ephemeralECDHSharedSecret = x448.getSharedSecret(ephemeralECDHSecretKey, receiverECDHPub)
 
   const { cipherText, sharedSecret: pqcSharedSecret } = ml_kem512.encapsulate(receiverKyberPub)
   const ecdhSharedSecret = x448.getSharedSecret(senderECDHPriv, receiverECDHPub).slice(1)
@@ -21,7 +21,7 @@ export function hybridDecapsulate(
   receiverKyberPriv,
   ciphertext,
 ) {
-  const ephemeralECDHSharedSecret = x448.getSharedSecret(receiverECDHPriv, ephemeralPublicKey).slice(1);
+  const ephemeralECDHSharedSecret = x448.getSharedSecret(receiverECDHPriv, ephemeralPublicKey)
 
   const pqcSharedSecret = ml_kem512.decapsulate(ciphertext, receiverKyberPriv)
 
