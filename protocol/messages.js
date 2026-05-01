@@ -17,11 +17,9 @@ export function encryptMessage(receiver, sender, content) {
         receiver_id: receiver?.id,
         sender_keys: {
             public_key: sender?.ecdh?.public_key,
-            secret_key: sender?.ecdh?.secret_key
         },
         receiver_keys: {
             public_key: receiver?.ecdh?.public_key,
-            secret_key: receiver?.ecdh?.secret_key
         },
         nonce
     })
@@ -44,11 +42,9 @@ export function decryptMessage(receiver, sender, message) {
         receiver_id: receiver?.id,
         sender_keys: {
             public_key: sender?.ecdh?.public_key,
-            secret_key: sender?.ecdh?.secret_key
         },
         receiver_keys: {
             public_key: receiver?.ecdh?.public_key,
-            secret_key: receiver?.ecdh?.secret_key
         },
         nonce: message?.iv
     })
