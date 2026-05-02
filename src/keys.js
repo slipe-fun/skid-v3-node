@@ -1,5 +1,4 @@
 import { ed448, x448 } from '@noble/curves/ed448.js'
-import { sha512 } from '@noble/hashes/sha2.js'
 import { ml_kem512 } from '@noble/post-quantum/ml-kem.js'
 
 import { randomBytes } from '@noble/hashes/utils.js'

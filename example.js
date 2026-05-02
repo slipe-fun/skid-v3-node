@@ -1,4 +1,5 @@
 import { skid } from "./index.js";
+import { finalizeKeyExchange, initiateKeyExchange } from "./src/hybrid.js";
 
 // just test data
 
@@ -19,8 +20,8 @@ const chats = [
 
 // generate user keys
 
-const user_keys_A = skid.keys.e2ee.generate()
-const user_keys_B = skid.keys.e2ee.generate()
+const user_keys_A = { id: 1, ...skid.keys.e2ee.generate() }
+const user_keys_B = { id: 2, ...skid.keys.e2ee.generate() }
 
 // generate master key
 
@@ -45,13 +46,15 @@ const entropy = skid.keys.recovery_key.entropy.get(mnemonic);
 const encryptedMasterKey = skid.keys.master_key.encrypt(master_key, recovery_key, user_keys_A.ed.secret_key);
 const decryptedMasterKey = skid.keys.master_key.decrypt(encryptedMasterKey, recovery_key, user_keys_A.ed.public_key);
 
-// generate e2ee keys
+// get chat key
 
-const chat_user_A = { id: 1, chat_id: 5, ...skid.keys.e2ee.generate() };
-const chat_user_B = { id: 2, chat_id: 5, ...skid.keys.e2ee.generate() };
+const handshake = initiateKeyExchange(10, user_keys_A, user_keys_B);
+
+const senderKey = handshake?.chat_key;
+const syncedKey = finalizeKeyExchange(10, handshake?.payload, user_keys_A, user_keys_B, true);
+const receiverKey = finalizeKeyExchange(10, handshake.payload, user_keys_A, user_keys_B, false);
 
 // encrypt and decrypt message by e2ee keys
 
-const encryptedMessage = skid.message.encrypt(chat_user_B, chat_user_A, user_keys_A.ed.secret_key, new TextEncoder().encode("the first skid v3 message"))
-const decryptedMessage = skid.message.decrypt(chat_user_B, chat_user_A, user_keys_A.ed.public_key, encryptedMessage)
-const decryptedOwnMessage = skid.message.decrypt(chat_user_B, chat_user_A, user_keys_A.ed.public_key, encryptedMessage, true)
+const encryptedMessage = skid.message.encrypt(senderKey, new TextEncoder().encode("the first skid v3 message"), user_keys_A, user_keys_B, user_keys_A.ed.secret_key)
+const decryptedMessage = skid.message.decrypt(receiverKey, encryptedMessage, user_keys_A, user_keys_B, user_keys_A.ed.public_key)
