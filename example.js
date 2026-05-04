@@ -1,5 +1,5 @@
 import { skid } from "./index.js";
-import { finalizeKeyExchange, initiateKeyExchange } from "./src/hybrid.js";
+import { finalizeKeyExchange, initiateKeyExchange } from "./protocol/handshake.js";
 
 // just test data
 
@@ -48,11 +48,11 @@ const decryptedMasterKey = skid.keys.master_key.decrypt(encryptedMasterKey, reco
 
 // get chat key
 
-const handshake = initiateKeyExchange(10, user_keys_A, user_keys_B);
+const handshake = skid.handshake.initiate(10, user_keys_A, user_keys_B);
 
 const senderKey = handshake?.chat_key;
-const syncedKey = finalizeKeyExchange(10, handshake?.payload, user_keys_A, user_keys_B, true);
-const receiverKey = finalizeKeyExchange(10, handshake.payload, user_keys_A, user_keys_B, false);
+const syncedKey = skid.handshake.finalize(10, handshake?.payload, user_keys_A, user_keys_B, true);
+const receiverKey = skid.handshake.finalize(10, handshake.payload, user_keys_A, user_keys_B, false);
 
 // encrypt and decrypt message by e2ee keys
 

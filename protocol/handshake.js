@@ -1,10 +1,10 @@
 import { x448 } from '@noble/curves/ed448.js'
 import { ml_kem512 } from '@noble/post-quantum/ml-kem.js'
-import { decrypt, encrypt } from './aes.js';
-import { hkdfExpand } from './hkdf.js';
-import { numberToBytes } from './utils.js';
-import { generateSalt } from './keys.js';
-import { buildAAD } from './aad.js';
+import { decrypt, encrypt } from '../src/aes.js';
+import { hkdfExpand } from '../src/hkdf.js';
+import { numberToBytes } from '../src/utils.js';
+import { generateSalt } from '../src/keys.js';
+import { buildAAD } from '../src/aad.js';
 
 export function initiateKeyExchange(chat_id, sender, receiver) {
     const { cipherText: senderCipherText, sharedSecret: senderPqcSharedSecret } = ml_kem512.encapsulate(sender?.ml_kem?.public_key);

@@ -1,4 +1,5 @@
 import { decryptBundle, encryptBundle } from "./protocol/bundles.js";
+import { finalizeKeyExchange, initiateKeyExchange } from "./protocol/handshake.js";
 import { decryptMasterKey, encryptMasterKey } from "./protocol/keys.js";
 import { decryptMessage, encryptMessage } from "./protocol/messages.js";
 import { getEntropy, getMnemonic } from "./src/bip.js";
@@ -23,6 +24,10 @@ export const skid = {
                 get: getEntropy
             }
         }
+    },
+    handshake: {
+        initiate: initiateKeyExchange,
+        finalize: finalizeKeyExchange
     },
     message: {
         encrypt: encryptMessage,
