@@ -1,14 +1,16 @@
-import { decryptBundle, encryptBundle } from "./protocol/bundles.js";
 import { finalizeKeyExchange, initiateKeyExchange } from "./protocol/handshake.js";
-import { decryptMasterKey, encryptMasterKey } from "./protocol/keys.js";
+import { decryptIdentityKeys, encryptIdentityKeys } from "./protocol/identity_keys.js";
+import { decryptMasterKey, encryptMasterKey } from "./protocol/master_key.js";
 import { decryptMessage, encryptMessage } from "./protocol/messages.js";
 import { getEntropy, getMnemonic } from "./src/bip.js";
 import { generate_E2EE_Keys, generateByteKey } from "./src/keys.js";
 
 export const skid = {
     keys: {
-        e2ee: {
-            generate: generate_E2EE_Keys
+        identity: {
+            generate: generate_E2EE_Keys,
+            encrypt: encryptIdentityKeys,
+            decrypt: decryptIdentityKeys
         },
         master_key: {
             generate: () => generateByteKey(32),
@@ -32,9 +34,5 @@ export const skid = {
     message: {
         encrypt: encryptMessage,
         decrypt: decryptMessage
-    },
-    bundle: {
-        encrypt: encryptBundle,
-        decrypt: decryptBundle
     }
 }

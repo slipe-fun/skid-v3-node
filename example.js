@@ -1,27 +1,11 @@
 import { skid } from "./index.js";
 import { finalizeKeyExchange, initiateKeyExchange } from "./protocol/handshake.js";
-
-// just test data
-
-const chats = [
-    {
-        chat_id: 1,
-        ...skid.keys.e2ee.generate(),
-    },
-    {
-        chat_id: 10,
-        ...skid.keys.e2ee.generate(),
-    },
-    {
-        chat_id: 3,
-        ...skid.keys.e2ee.generate(),
-    },
-]
+import { decryptIdentityKeys, encryptIdentityKeys } from "./protocol/identity_keys.js";
 
 // generate user keys
 
-const user_keys_A = { id: 1, ...skid.keys.e2ee.generate() }
-const user_keys_B = { id: 2, ...skid.keys.e2ee.generate() }
+const user_keys_A = { id: 1, ...skid.keys.identity.generate() }
+const user_keys_B = { id: 2, ...skid.keys.identity.generate() }
 
 // generate master key
 
@@ -29,8 +13,8 @@ const master_key = skid.keys.master_key.generate();
 
 // encrypt and decrypt bundle by master_key
 
-const encryptedBundle = skid.bundle.encrypt(master_key, user_keys_A.ed.secret_key, chats)
-const decryptedBundle = skid.bundle.decrypt(master_key, user_keys_A.ed.public_key, encryptedBundle)
+const encryptedIdentityKeys = skid.keys.identity.encrypt(user_keys_A, master_key, user_keys_A.ed.secret_key);
+const decryptedIdentityKeys = skid.keys.identity.decrypt(encryptedIdentityKeys, user_keys_A, master_key, user_keys_A.ed.public_key);
 
 // generate recovery key
 
