@@ -1,10 +1,10 @@
 import { ed448, x448 } from '@noble/curves/ed448.js'
-import { ml_kem512 } from '@noble/post-quantum/ml-kem.js'
+import { ml_kem768 } from '@noble/post-quantum/ml-kem.js'
 
 import { randomBytes } from '@noble/hashes/utils.js'
 
 export function generate_E2EE_Keys() {
-  const { publicKey: kyberPublicKey, secretKey: kyberSecretKey } = ml_kem512.keygen()
+  const { publicKey: kyberPublicKey, secretKey: kyberSecretKey } = ml_kem768.keygen()
   const { publicKey: ecdhPublicKey, secretKey: ecdhSecretKey } = x448.keygen()
   const { publicKey: edPublicKey, secretKey: edSecretKey } = ed448.keygen()
 

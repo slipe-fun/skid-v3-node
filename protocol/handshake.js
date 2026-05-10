@@ -1,5 +1,5 @@
 import { x448 } from '@noble/curves/ed448.js'
-import { ml_kem512 } from '@noble/post-quantum/ml-kem.js'
+import { ml_kem768 } from '@noble/post-quantum/ml-kem.js'
 import { decrypt, encrypt } from '../src/aes.js';
 import { hkdfExpand } from '../src/hkdf.js';
 import { numberToBytes } from '../src/utils.js';
@@ -7,8 +7,8 @@ import { generateSalt } from '../src/keys.js';
 import { buildAAD } from '../src/aad.js';
 
 export function initiateKeyExchange(chat_id, sender, receiver) {
-    const { cipherText: senderCipherText, sharedSecret: senderPqcSharedSecret } = ml_kem512.encapsulate(sender?.ml_kem?.public_key);
-    const { cipherText: receiverCipherText, sharedSecret: receiverPqcSharedSecret } = ml_kem512.encapsulate(receiver?.ml_kem?.public_key);
+    const { cipherText: senderCipherText, sharedSecret: senderPqcSharedSecret } = ml_kem768.encapsulate(sender?.ml_kem?.public_key);
+    const { cipherText: receiverCipherText, sharedSecret: receiverPqcSharedSecret } = ml_kem768.encapsulate(receiver?.ml_kem?.public_key);
 
     const ecdhSharedSecret = x448.getSharedSecret(sender?.ecdh?.secret_key, receiver?.ecdh?.public_key);
 
@@ -45,7 +45,7 @@ export function finalizeKeyExchange(chat_id, payload, sender, receiver, isSelf =
     const ecdhSharedSecret = x448.getSharedSecret(receiver?.ecdh?.secret_key, sender?.ecdh?.public_key);
 
     if (isSelf) {
-        const pqcSharedSecret_A = ml_kem512.decapsulate(payload?.senderCipherText, sender?.ml_kem?.secret_key);
+        const pqcSharedSecret_A = ml_kem768.decapsulate(payload?.senderCipherText, sender?.ml_kem?.secret_key);
 
         const syncMaterial = new Uint8Array([...pqcSharedSecret_A, ...ecdhSharedSecret]);
         const syncKey = hkdfExpand(syncMaterial, numberToBytes(chat_id), new TextEncoder().encode(`skid:v3:sync_key`), 32);
@@ -60,7 +60,7 @@ export function finalizeKeyExchange(chat_id, payload, sender, receiver, isSelf =
 
         pqcSharedSecret = decrypt(syncKey, payload.encryptedSync.ciphertext, payload.encryptedSync.nonce, aad);
     } else {
-        pqcSharedSecret = ml_kem512.decapsulate(payload?.receiverCipherText, receiver?.ml_kem?.secret_key);
+        pqcSharedSecret = ml_kem768.decapsulate(payload?.receiverCipherText, receiver?.ml_kem?.secret_key);
     }
 
     const material = new Uint8Array([...pqcSharedSecret, ...ecdhSharedSecret]);
