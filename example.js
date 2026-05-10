@@ -1,6 +1,4 @@
 import { skid } from "./index.js";
-import { finalizeKeyExchange, initiateKeyExchange } from "./protocol/handshake.js";
-import { decryptIdentityKeys, encryptIdentityKeys } from "./protocol/identity_keys.js";
 
 // generate user keys
 
