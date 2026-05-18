@@ -16,3 +16,25 @@ export function base64ToBytes(base64) {
   }
   return bytes;
 }
+
+export function prepareForSigning(obj) {
+    if (obj === null || typeof obj !== 'object') {
+        return obj;
+    }
+
+    if (obj instanceof Uint8Array) {
+        return btoa(Array.from(obj, byte => String.fromCharCode(byte)).join(''));
+    }
+
+    if (Array.isArray(obj)) {
+        return obj.map(item => prepareForSigning(item));
+    }
+
+    const cleaned = {};
+    for (const key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+            cleaned[key] = prepareForSigning(obj[key]);
+        }
+    }
+    return cleaned;
+}
