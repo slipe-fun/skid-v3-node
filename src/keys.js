@@ -28,6 +28,10 @@ export function generateByteKey(length) {
   return randomBytes(length);
 }
 
-export function generateSalt() {
+export function generateNonce() {
   return randomBytes(12);
+}
+
+export function generateSalt() {
+  return randomBytes(16);
 }
