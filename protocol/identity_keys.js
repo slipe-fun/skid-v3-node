@@ -2,8 +2,8 @@ import { ed448 } from "@noble/curves/ed448.js";
 import { buildAAD } from "../src/aad.js";
 import { decrypt, encrypt } from "../src/aes.js";
 import { hkdfExpand } from "../src/hkdf.js";
-import { generateSalt } from "../src/keys.js";
-import { base64ToBytes } from "../src/utils.js";
+import { generateNonce, generateSalt } from "../src/keys.js";
+import { base64ToBytes, prepareForSigning } from "../src/utils.js";
 
 export function encryptIdentityKeys(identity_keys, master_key, secret_sign_key) {
     const toEncrypt = new TextEncoder().encode(JSON.stringify({
@@ -13,7 +13,7 @@ export function encryptIdentityKeys(identity_keys, master_key, secret_sign_key) 
     }));
 
     const salt = generateSalt();
-    const nonce = generateSalt();
+    const nonce = generateNonce();
 
     const derivedKey = hkdfExpand(master_key, salt, new TextEncoder().encode("skid:v3:master_key"), 32);
 
@@ -26,12 +26,13 @@ export function encryptIdentityKeys(identity_keys, master_key, secret_sign_key) 
 
     const encrypted = encrypt(derivedKey, toEncrypt, nonce, aad);
 
-    const signature = ed448.sign(new TextEncoder().encode(JSON.stringify({
+    const signature = ed448.sign(new TextEncoder().encode(JSON.stringify(prepareForSigning({
         ...encrypted,
         ml_kem_public_key: identity_keys?.ml_kem?.public_key,
         ecdh_public_key: identity_keys?.ecdh?.public_key,
         ed_public_key: identity_keys?.ed?.public_key,
-    })), secret_sign_key)
+        salt
+    }))), secret_sign_key, { context: new Uint8Array(0) })
 
     return {
         ...encrypted,
@@ -50,13 +51,14 @@ export function decryptIdentityKeys(encrypted_identity_keys, public_identity_key
         ed_public_key: public_identity_keys?.ed?.public_key,
     })
 
-    if (!ed448.verify(encrypted_identity_keys?.signature, new TextEncoder().encode(JSON.stringify({
+    if (!ed448.verify(encrypted_identity_keys?.signature, new TextEncoder().encode(JSON.stringify(prepareForSigning({
         ciphertext: encrypted_identity_keys?.ciphertext,
         nonce: encrypted_identity_keys?.nonce,
         ml_kem_public_key: public_identity_keys?.ml_kem?.public_key,
         ecdh_public_key: public_identity_keys?.ecdh?.public_key,
         ed_public_key: public_identity_keys?.ed?.public_key,
-    })), public_sign_key)) throw new Error("invalid signature");
+        salt: encrypted_identity_keys?.salt
+    }))), public_sign_key, { context: new Uint8Array(0) })) throw new Error("invalid signature");
 
     let identity_keys = decrypt(derivedKey, encrypted_identity_keys?.ciphertext, encrypted_identity_keys?.nonce, aad);
 
